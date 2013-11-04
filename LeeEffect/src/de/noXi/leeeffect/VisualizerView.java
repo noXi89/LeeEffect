@@ -1,3 +1,19 @@
+/*
+ * This file is part of LeeEffect for Android.
+ * 
+ * LeeEffect for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.noXi.leeeffect;
 
 import android.content.Context;
@@ -9,22 +25,48 @@ import android.media.audiofx.Visualizer;
 import android.util.AttributeSet;
 import android.view.View;
 
+/**
+ * The Class VisualizerView. Visualizes audio from specified <a href="http://developer.android.com/reference/android/media/AudioRecord.html#getAudioSessionId()">AudioSessionID</a>.<br>
+ * Uses <a href="http://developer.android.com/reference/android/media/AudioRecord.html#getAudioSessionId()">AudioSessionID</a> <b>0</b> (default speaker output) by default.<br>
+ * 
+ * @see <a href="http://developer.android.com/reference/android/media/AudioRecord.html#getAudioSessionId()">android.media.AudioRecord#getAudioSessionId()</a>
+ */
 public class VisualizerView extends View {
 
+	/** The bytes. */
 	private byte[] bytes;
+	
+	/** The points. */
 	private float[] points;
+	
+	/** The rect. */
 	private Rect rect = new Rect();
+	
+	/** The fore paint. */
 	private Paint forePaint = new Paint();
+	
+	/** The back paint. */
 	private Paint backPaint = new Paint();
+	
+	/** The visualizer. */
 	private Visualizer visualizer;
 
+	/**
+	 * Instantiates a new visualizer view.
+	 *
+	 * @param context the context
+	 * @param attrs the attrs
+	 */
 	public VisualizerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		//prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		init();
+		initDraw();
 		initVisualizer();
 	}
 
+	/**
+	 * Inits the visualizer.
+	 */
 	private void initVisualizer(){
 		visualizer = new Visualizer(0);
 		visualizer.setEnabled(false);
@@ -45,7 +87,10 @@ public class VisualizerView extends View {
 		visualizer.setEnabled(true);
 	}
 
-	private void init() {
+	/**
+	 * Inits the paint for draw.
+	 */
+	private void initDraw() {
 		bytes = null;
 		//int colorchosen = prefs.getInt("COLOR_PREFERENCE_KEY",
 		//      Color.WHITE);
@@ -58,11 +103,19 @@ public class VisualizerView extends View {
 		backPaint.setColor(Color.BLACK);
 	}
 
+	/**
+	 * Update visualizer with new <code>bytes</code>, forces redraw.
+	 *
+	 * @param bytes the bytes
+	 */
 	public void updateVisualizer(byte[] bytes) {
 		this.bytes = bytes;
 		invalidate();
 	}
 
+	/* (non-Javadoc)
+	 * @see android.view.View#onDraw(android.graphics.Canvas)
+	 */
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);

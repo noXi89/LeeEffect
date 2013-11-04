@@ -1,3 +1,19 @@
+/*
+ * This file is part of LeeEffect for Android.
+ * 
+ * LeeEffect for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.noXi.leeeffect;
 
 import android.annotation.SuppressLint;
@@ -18,35 +34,73 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+/**
+ * The Class MainActivity.
+ */
 public class MainActivity extends Activity {
 	
+	/** The audio bytes buffer. */
 	private byte[] audioBytesBuffer = null;
+    
+    /** The Constant DB_NAME. */
     private static final String DB_NAME = "LeeEffectDB";
+    
+    /** The Constant BITRATE_ID. */
     private static final String BITRATE_ID = "Bitrate";
+    
+    /** The Constant ISRECORDING_ID. */
     private static final String ISRECORDING_ID = "isRecording";
+    
+    /** The Constant ENCODING. */
     private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+    
+    /** The start stop button. */
     private ToggleButton startStopButton = null;
+    
+    /** The delay text view. */
     private TextView delayTextView = null;
-    private static final int bitrate = 11025;
-    private int audioBytesBufferSize = AudioRecord.getMinBufferSize(bitrate, AudioFormat.CHANNEL_IN_MONO, ENCODING);
+    
+    /** The Constant BITRATE. */
+    private static final int BITRATE = 11025;
+    
+    /** The audio bytes buffer size. */
+    private int audioBytesBufferSize = AudioRecord.getMinBufferSize(BITRATE, AudioFormat.CHANNEL_IN_MONO, ENCODING);
+    
+    /** The audio bytes buffer size min. */
     private int audioBytesBufferSizeMin = audioBytesBufferSize;
+    
+    /** The audio delay progress. */
     private int audioDelayProgress = 0;
+    
+    /** The recording state. */
     private Boolean isRecording = false;
+    
+    /** The audio thread. */
     private Thread audioThread = null;
     
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
+    
+    /* (non-Javadoc)
+     * @see android.app.Activity#onPostCreate(android.os.Bundle)
+     */
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
     	super.onPostCreate(savedInstanceState);
     }
 
-    void startT(){
-    	stopT();
+    /**
+     * Start the audio thread.
+     */
+    void startThread(){
+    	stopThread();
     	audioThread = null;
     	audioThread = new Thread(){ 
 	     	public void run() {
@@ -67,10 +121,10 @@ public class MainActivity extends Activity {
 							   }
 							   
 							   audioBytesBuffer = new byte[buffersize_old];
-					       	   arec = new AudioRecord(MediaRecorder.AudioSource.MIC, bitrate, AudioFormat.CHANNEL_IN_MONO, ENCODING, buffersize_old);
-				        	   atrack = new AudioTrack(AudioManager.STREAM_MUSIC, bitrate, AudioFormat.CHANNEL_OUT_MONO, ENCODING, buffersize_old, AudioTrack.MODE_STREAM);
+					       	   arec = new AudioRecord(MediaRecorder.AudioSource.MIC, BITRATE, AudioFormat.CHANNEL_IN_MONO, ENCODING, buffersize_old);
+				        	   atrack = new AudioTrack(AudioManager.STREAM_MUSIC, BITRATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, buffersize_old, AudioTrack.MODE_STREAM);
 				        	   atrack.setStereoVolume(AudioTrack.getMaxVolume(), AudioTrack.getMaxVolume());
-				        	   atrack.setPlaybackRate(bitrate);
+				        	   atrack.setPlaybackRate(BITRATE);
 							   arec.startRecording();
 							   atrack.play();
 							   //widget.setStreamId(atrack.getAudioSessionId());
@@ -92,7 +146,10 @@ public class MainActivity extends Activity {
     	Toast.makeText(this, "Alive: " + (audioThread!=null && audioThread.isAlive()), Toast.LENGTH_SHORT).show();
     }
     
-    void stopT(){
+    /**
+     * Stop the audio thread (join).
+     */
+    void stopThread(){
     	isRecording = false;
     	if(audioThread!=null) {
 	    	try {
@@ -103,13 +160,19 @@ public class MainActivity extends Activity {
     	}
     }
     
+    /**
+     * Update text for user.
+     */
     void updateText()
     {
     	if(delayTextView != null)
     		audioBytesBufferSize = (audioDelayProgress+1) * audioBytesBufferSizeMin;
-    		delayTextView.setText("Verzögerung: "+(audioBytesBufferSize*1000/bitrate/2)+"ms");
+    		delayTextView.setText("Verzögerung: "+(audioBytesBufferSize*1000/BITRATE/2)+"ms");
     }
     
+    /* (non-Javadoc)
+     * @see android.app.Activity#onResume()
+     */
     @Override
     protected void onResume() {
     	super.onResume();
@@ -120,9 +183,9 @@ public class MainActivity extends Activity {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if(isChecked){
-					startT();
+					startThread();
 				}else{
-					stopT();
+					stopThread();
 				}
 				
 			}
@@ -152,14 +215,17 @@ public class MainActivity extends Activity {
     	updateText();
         startStopButton.setChecked(this.getSharedPreferences(DB_NAME, MODE_PRIVATE).getBoolean(ISRECORDING_ID, false));
         if(startStopButton.isChecked()){
-        	startT();
+        	startThread();
         }
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onPause()
+     */
     @SuppressLint("NewApi") @Override
     protected void onPause() {
     	super.onPause();
-    	stopT();
+    	stopThread();
     	
     	this.getSharedPreferences(DB_NAME, MODE_PRIVATE)
     		.edit()
@@ -169,11 +235,14 @@ public class MainActivity extends Activity {
     	
     }
 
+    /**
+     * There is no menu.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        // getMenuInflater().inflate(R.menu.main, menu);
+        return false;
     }
     
 }

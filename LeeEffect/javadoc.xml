@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="private" additionalparam="-classpath &quot;C:\coding\adt-bundle-windows-x86_64-20130917\sdk\platforms\android-18\android.jar&quot;&#13;&#10;-d &quot;C:\Users\Alex\git\LeeEffect\LeeEffect\doc&quot;" classpath="." sourcefiles="src/de/noXi/leeeffect/MainActivity.java,src/de/noXi/leeeffect/VisualizerView.java" sourcepath="gen;src">
+            <doclet name="com.google.doclava.Doclava" path="C:\coding\other\doclava-1.0.6\doclava-1.0.6.jar"/>
+        </javadoc>
+    </target>
+</project>
